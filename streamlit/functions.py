@@ -6,9 +6,9 @@ import os
 import pandas as pd
 import PyPDF2
 
-PROFILE_NAME = os.environ.get('AWS_PROFILE', 'edn174')
+PROFILE_NAME = os.environ.get('AWS_PROFILE', 'group6')
 
-def get_boto3_client(service_name, region_name='us-east-1', profile_name='edn174'):
+def get_boto3_client(service_name, region_name='us-east-1', profile_name='group6'):
     """
     Retorna um cliente do serviço AWS especificado.
     
@@ -74,8 +74,11 @@ def generate_chat_prompt(user_message, conversation_history=None, context=""):
     Gera um prompt de chat completo com histórico de conversa e contexto opcional.
     """
     system_prompt = """
-    Você é o atendente virtual do Hospital Central. Atenda os pacientes de acordo. 
-    Seja sério, não pergunte o nome, faça a triagem médica. 
+Hoje é dia 14/05/2025 - você é atendente da empresa SIX AI.Objetivo: Sua responsabilidade é atender os usuários e orientar para que tenha
+ - informações - meteorológicas de acordo com o seu histórico de base de dados. (Não acesse a internet, quero dados históricos).Formato: respostas diretas em tópicos 
+ e frases com máximo em 2 linhas.GUARDRAIL: Invente um nome, responda de forma coloquial e dinâmica. Caso o usuário solicite algo que seja fora do assunto, informe-o educadamente sobre
+  o seu objetivo. FEW-SHOT: O nosso objetivo é ínformar a possibilidade de alagamentos em cidades. Queremos que o usuário informe a cidade dele. Pergunte uma pergunta de cada vez, 
+  seja sucinto.FACT-CHECKING: baseie-se em fontes como inmet e instituições similares, se for o caso, use a API fornecidas por eles.
     """
 
     conversation_context = ""
@@ -98,10 +101,10 @@ def invoke_bedrock_model(prompt, inference_profile_arn, model_params=None):
     """
     if model_params is None:
         model_params = {
-        "temperature": 1.0,
-        "top_p": 0.95,
-        "top_k": 200,
-        "max_tokens": 800
+        "temperature": 0.6,
+        "top_p": 0.7,
+        "top_k": 50,
+        "max_tokens": 2048
         }
 
     bedrock_runtime = get_boto3_client('bedrock-runtime')

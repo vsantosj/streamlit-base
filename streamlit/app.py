@@ -13,7 +13,7 @@ from functions import (
     generate_chat_prompt, format_context, 
     read_pdf_from_uploaded_file, read_txt_from_uploaded_file, read_csv_from_uploaded_file
 )
-PROFILE_NAME = os.environ.get("AWS_PROFILE", "edn174")
+PROFILE_NAME = os.environ.get("AWS_PROFILE", "group6")
 
 INFERENCE_PROFILE_ARN = "arn:aws:bedrock:us-east-1:851614451056:inference-profile/us.anthropic.claude-3-5-sonnet-20241022-v2:0"
 
@@ -44,7 +44,7 @@ def add_javascript():
 
 #alterar
 st.set_page_config(
-   page_title="NOME DA PÁGINA",
+   page_title="SIX AI",
    page_icon="logo.jpeg",
    layout="wide",
    initial_sidebar_state="expanded"
@@ -58,7 +58,7 @@ def preprocess_user_message(message):
     """
     return message
 
-def get_boto3_client(service_name, region_name='us-east-1', profile_name='edn174'):
+def get_boto3_client(service_name, region_name='us-east-1', profile_name='group6'):
     """
     Retorna um cliente do serviço AWS especificado.
     
@@ -93,10 +93,10 @@ def query_bedrock(message, session_id="", model_params=None, context=""):
     #ALTERAR
     if model_params is None:
         model_params = {
-            "temperature": 1.0,
-            "top_p": 0.85,
-            "top_k": 200,
-            "max_tokens": 800,
+            "temperature": 0.6,
+            "top_p": 0.7,
+            "top_k": 50,
+            "max_tokens": 2048,
             "response_format": {"type": "text"}
         }
     
