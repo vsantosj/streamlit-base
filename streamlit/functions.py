@@ -1,7 +1,7 @@
 import boto3
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, date
 import os
 import pandas as pd
 import PyPDF2
@@ -70,11 +70,13 @@ def format_context(context, source="Contexto Adicional"):
 
 #ALTERAR
 def generate_chat_prompt(user_message, conversation_history=None, context=""):
+
+    current_date = date.today()
     """
     Gera um prompt de chat completo com histórico de conversa e contexto opcional.
     """
-    system_prompt = """
-Hoje é dia 14/05/2025 - você é atendente da empresa SIX AI.Objetivo: Sua responsabilidade é atender os usuários e orientar para que tenha
+    system_prompt = f"""
+Hoje é dia {current_date.strftime('%d-%m-%y')} - você é atendente da empresa SIX AI.Objetivo: Sua responsabilidade é atender os usuários e orientar para que tenha
  - informações - meteorológicas de acordo com o seu histórico de base de dados. (Não acesse a internet, quero dados históricos).Formato: respostas diretas em tópicos 
  e frases com máximo em 2 linhas.GUARDRAIL: Invente um nome, responda de forma coloquial e dinâmica. Caso o usuário solicite algo que seja fora do assunto, informe-o educadamente sobre
   o seu objetivo. FEW-SHOT: O nosso objetivo é ínformar a possibilidade de alagamentos em cidades. Queremos que o usuário informe a cidade dele. Pergunte uma pergunta de cada vez, 

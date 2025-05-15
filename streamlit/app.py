@@ -86,11 +86,12 @@ def get_boto3_client(service_name, region_name='us-east-1', profile_name='group6
             print(f"ERRO: Falha ao criar cliente boto3: {str(e)}")
             return None
 
-def query_bedrock(message, session_id="", model_params=None, context=""):
+
+def query_bedrock(message, session_id="", model_params=None, context="", conversation_history=None):
     """
     Envia uma mensagem para o Amazon Bedrock com parâmetros de modelo específicos.
     """
-    #ALTERAR
+    # ALTERAR
     if model_params is None:
         model_params = {
             "temperature": 0.6,
@@ -99,18 +100,18 @@ def query_bedrock(message, session_id="", model_params=None, context=""):
             "max_tokens": 2048,
             "response_format": {"type": "text"}
         }
-    
+
     bedrock_runtime = get_boto3_client('bedrock-runtime')
-    
+
     if not bedrock_runtime:
         return {
             "answer": "Não foi possível conectar ao serviço Bedrock. Verifique suas credenciais.",
             "sessionId": session_id or str(uuid.uuid4())
         }
-    
+
     try:
-        prompt = generate_chat_prompt(message, context=context)
-        
+        prompt = generate_chat_prompt(message, conversation_history=conversation_history, context=context)
+
         body = json.dumps({
             "anthropic_version": "bedrock-2023-05-31",
             "max_tokens": model_params["max_tokens"],
@@ -129,32 +130,31 @@ def query_bedrock(message, session_id="", model_params=None, context=""):
                 }
             ]
         })
-        
+
         response = bedrock_runtime.invoke_model(
-        modelId=INFERENCE_PROFILE_ARN,
-        body=body,
-        contentType="application/json",
-        accept="application/json"
-    )
-        
+            modelId=INFERENCE_PROFILE_ARN,
+            body=body,
+            contentType="application/json",
+            accept="application/json"
+        )
+
         response_body = json.loads(response['body'].read())
         answer = response_body['content'][0]['text']
-        
+
         if not session_id:
             session_id = str(uuid.uuid4())
-        
+
         return {
             "answer": answer,
             "sessionId": session_id
         }
-        
+
     except Exception as e:
         print(f"ERRO: Falha na requisição ao Bedrock: {str(e)}")
         return {
             "answer": "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.",
             "sessionId": session_id or str(uuid.uuid4())
         }
-
 def check_password():
     """Returns `True` if the user had the correct password."""
 
@@ -341,7 +341,7 @@ def handle_message():
                     else:
                         combined_context = rag_context
                     
-                    result = query_bedrock(user_message, current_session_id, context=combined_context)
+                    result = query_bedrock(user_message, current_session_id, context=combined_context, conversation_history=st.session_state.messages)
                 
                 if result:
                     assistant_message = result.get('answer', 'Não foi possível obter uma resposta.')
@@ -477,7 +477,7 @@ def regenerate_message(index):
     status_placeholder.info("Regenerando resposta...")
     
     with st.spinner():
-        result = query_bedrock(user_message, st.session_state.session_id)
+        result = query_bedrock(user_message, st.session_state.session_id, conversation_history=st.session_state.messages)
         
     if result:
         new_response = result.get('answer', 'Não foi possível regenerar a resposta.')
@@ -814,7 +814,7 @@ def handle_message_with_input(user_input):
                 with st.spinner():
                     current_session_id = "" if is_first_message else st.session_state.session_id
                     rag_context = get_rag_context()
-                    result = query_bedrock(user_input, current_session_id, context=rag_context)
+                    result = query_bedrock(user_input, current_session_id, context=rag_context, conversation_history=st.session_state.messages)
                 
                 if result:
                     assistant_message = result.get('answer', 'Não foi possível obter uma resposta.')
